@@ -42,6 +42,8 @@ type Filter struct {
 	Tag        string
 	Visibility string
 	AboutRef   string
+	// Source is an import source: only entries POST /imports wrote under it.
+	Source string
 	// WrittenFrom and WrittenTo bound written_at, epoch seconds: from is
 	// inclusive, to exclusive. 0 = unbounded.
 	WrittenFrom    int64

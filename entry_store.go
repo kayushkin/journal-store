@@ -519,6 +519,9 @@ func (s *Store) List(filter Filter) ([]Entry, error) {
 	if filter.AboutRef != "" {
 		where, args = append(where, "about_ref = ?"), append(args, filter.AboutRef)
 	}
+	if filter.Source != "" {
+		where, args = append(where, "source = ?"), append(args, filter.Source)
+	}
 	if filter.WrittenFrom > 0 {
 		where, args = append(where, "written_at >= ?"), append(args, filter.WrittenFrom)
 	}

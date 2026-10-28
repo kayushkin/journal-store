@@ -81,7 +81,7 @@ can classify.
 | `GET` | `/settings` | the declared settings; the token shows only as set |
 | `GET` | `/entry-kinds` | `["journal","post","note","about","timeline","transcript"]` |
 | `GET` | `/visibilities` | `["private","draft","published"]` |
-| `GET` | `/entries` | live entries, newest `written_at` first. `?q=` (FTS5 over title, body, tags; each word a quoted prefix, ANDed), `?kind=`, `?tag=`, `?visibility=`, `?about_ref=`, `?from=` (inclusive) `&to=` (exclusive) on `written_at` in epoch seconds, `?include_deleted=true`, `?limit=` (default 50, max 500), `?offset=`. A bad kind, visibility or number is a 400 |
+| `GET` | `/entries` | live entries, newest `written_at` first. `?q=` (FTS5 over title, body, tags; each word a quoted prefix, ANDed), `?kind=`, `?tag=`, `?visibility=`, `?about_ref=`, `?source=` (entries `POST /imports` wrote under that source, with their `source_ref`), `?from=` (inclusive) `&to=` (exclusive) on `written_at` in epoch seconds, `?include_deleted=true`, `?limit=` (default 50, max 500), `?offset=`. A bad kind, visibility or number is a 400 |
 | `POST` | `/entries` | `EntryInput`: `kind`, `title`, `body`, `written_at`, `visibility`, `slug`, `tags`, `about_ref`. **201**. Any other key is a 400 |
 | `GET` | `/entries/{id}` | with `mentions`. A deleted entry is **404** unless `?include_deleted=true` |
 | `PATCH` | `/entries/{id}` | any of the `POST` keys. **An unknown key is a 400** naming the accepted ones; `id`, `published_at`, `deleted_at`, `created_at`, `updated_at`, `source*` and `mentions` are 400s saying what moves them; `null` is a 400. A deleted entry is 404 |

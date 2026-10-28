@@ -182,6 +182,7 @@ func (h *handler) listEntries(w http.ResponseWriter, r *http.Request) {
 		Tag:            query.Get("tag"),
 		Visibility:     query.Get("visibility"),
 		AboutRef:       query.Get("about_ref"),
+		Source:         query.Get("source"),
 		IncludeDeleted: isTrue(query.Get("include_deleted")),
 	}
 	var ok bool

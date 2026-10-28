@@ -540,6 +540,20 @@ func samsungNote(ref, hash, body string) ImportEntry {
 		WrittenAt: 1600000000, Tags: []string{"samsung-notes"}}
 }
 
+func TestListBySourceShowsOnlyThatImportersEntries(t *testing.T) {
+	service := newTestService(t)
+	other := samsungNote("c.txt", "h3", "three")
+	other.Source = "skype"
+	service.call(http.MethodPost, "/imports", importRequest(samsungNote("a.txt", "h1", "one"), other), nil)
+	var entries []Entry
+	if status := service.call(http.MethodGet, "/entries?source=skype", nil, &entries); status != http.StatusOK {
+		t.Fatalf("GET ?source= = %d", status)
+	}
+	if len(entries) != 1 || entries[0].Source != "skype" || entries[0].SourceRef != "c.txt" {
+		t.Errorf("?source=skype = %+v", entries)
+	}
+}
+
 func TestImportIsIdempotentBySourceAndSourceRef(t *testing.T) {
 	service := newTestService(t)
 	var result ImportResult
