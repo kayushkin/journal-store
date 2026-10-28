@@ -174,8 +174,12 @@ func postJSON(address string, in, out any) error {
 // photoState is what this run knows of one picture in photo-store.
 type photoState struct {
 	photo *photostore.Photo // nil when photo-store does not hold it
-	// notImported says why a picture photo-store lacks was not imported.
+	// notImported says why a picture photo-store lacks cannot be imported.
 	notImported string
+	// thumbnail, width and height are made before any transcript is
+	// written, so a transcript says the same on every run.
+	thumbnail     []byte
+	width, height int
 }
 
 func (run config) run(out io.Writer) error {
@@ -442,6 +446,9 @@ func (run config) lookUpPhotos(conversations []*androidmessages.Conversation) (m
 				if len(found) > 0 {
 					state.photo = &found[0]
 				}
+				if attachment.Path != "" && (state.photo == nil || strings.HasPrefix(state.photo.Folder, photoFolderPrefix)) {
+					state.thumbnail, state.width, state.height, state.notImported = makeThumbnail(attachment)
+				}
 				photos[attachment.Sha256] = state
 			}
 		}
@@ -566,12 +573,11 @@ func (run config) importPhotos(transcripts []androidmessages.Transcript, options
 					skipped["purged in photo-store"]++
 					continue
 				}
-				thumb, width, height, reason := makeThumbnail(attachment)
-				if reason != "" {
-					skipped[reason]++
-					state.notImported = reason
+				if state.notImported != "" {
+					skipped[state.notImported]++
 					continue
 				}
+				thumb, width, height := state.thumbnail, state.width, state.height
 				entryID := entryIDs[transcript.Ref]
 				if entryID == "" && !run.dryRun {
 					return fmt.Errorf("journal-store gave no entry id for %s", transcript.Ref)
