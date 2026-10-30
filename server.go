@@ -179,6 +179,7 @@ func (h *handler) listEntries(w http.ResponseWriter, r *http.Request) {
 	filter := Filter{
 		Query:          query.Get("q"),
 		Kind:           query.Get("kind"),
+		ExcludeKinds:   query["exclude_kind"],
 		Tag:            query.Get("tag"),
 		Visibility:     query.Get("visibility"),
 		AboutRef:       query.Get("about_ref"),

@@ -517,6 +517,7 @@ func TestListFiltersAndSearch(t *testing.T) {
 	}
 	check("", about.ID, middle.ID, "entry_000001")
 	check("?kind=note", middle.ID)
+	check("?exclude_kind=note&exclude_kind=about", "entry_000001")
 	check("?tag=weather", "entry_000001")
 	check("?q=weath", "entry_000001") // a prefix of a tag
 	check("?q=well-being", middle.ID) // a hyphen is text, not a 500
@@ -526,7 +527,7 @@ func TestListFiltersAndSearch(t *testing.T) {
 	check("?limit=1&offset=1", middle.ID)
 	check("?visibility=private", about.ID, middle.ID, "entry_000001")
 
-	for _, query := range []string{"?from=2024-01-01", "?kind=diary", "?visibility=public", "?limit=x"} {
+	for _, query := range []string{"?from=2024-01-01", "?kind=diary", "?exclude_kind=diary", "?visibility=public", "?limit=x"} {
 		if status := service.call(http.MethodGet, "/entries"+query, nil, nil); status != http.StatusBadRequest {
 			t.Errorf("GET /entries%s = %d, want 400", query, status)
 		}

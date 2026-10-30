@@ -37,11 +37,13 @@ var (
 // Filter selects entries for GET /entries. The zero value lists live entries,
 // newest written first.
 type Filter struct {
-	Query      string
-	Kind       string
-	Tag        string
-	Visibility string
-	AboutRef   string
+	Query string
+	Kind  string
+	// ExcludeKinds are kinds left out (`exclude_kind`, repeatable).
+	ExcludeKinds []string
+	Tag          string
+	Visibility   string
+	AboutRef     string
 	// Source is an import source: only entries POST /imports wrote under it.
 	Source string
 	// WrittenFrom and WrittenTo bound written_at, epoch seconds: from is

@@ -506,6 +506,13 @@ func (s *Store) List(filter Filter) ([]Entry, error) {
 		}
 		where, args = append(where, "kind = ?"), append(args, kind)
 	}
+	for _, excluded := range filter.ExcludeKinds {
+		kind, ok := NormalizeKind(excluded)
+		if !ok {
+			return nil, errUnknownKind(excluded)
+		}
+		where, args = append(where, "kind != ?"), append(args, kind)
+	}
 	if filter.Visibility != "" {
 		visibility, ok := NormalizeVisibility(filter.Visibility)
 		if !ok {
