@@ -11,7 +11,7 @@ BIN_DIR="$HOME/bin"
 SERVICE="journal-store.service"
 BINARY="journal-store"
 # Commands an operator runs, built from cmd/<name> and installed as ~/bin/<name>.
-TOOLS=(journal-import-files journal-import-skype journal-import-discord-package journal-import-facebook-messages journal-import-facebook-posts journal-import-android-messages)
+TOOLS=(journal-import-files journal-import-skype journal-import-discord-package journal-import-facebook-messages journal-import-facebook-posts journal-import-android-messages journal-point-transcripts-at-messages)
 UNIT_SRC="$REPO_DIR/$SERVICE"
 UNIT_DEST="$HOME/.config/systemd/user/$SERVICE"
 DROP_IN="$HOME/.config/systemd/user/$SERVICE.d"
