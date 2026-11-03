@@ -365,7 +365,7 @@ var (
 
 // DateInText finds the first date in the first datedLinesToSearch non-empty
 // lines and returns midnight of that day in location. Only forms that read
-// one way are recognised; a date that does not exist (2024-02-30) is not one.
+// one way are recognized; a date that does not exist (2024-02-30) is not one.
 func DateInText(text string, location *time.Location) (time.Time, bool) {
 	searched := 0
 	for _, line := range strings.Split(text, "\n") {
