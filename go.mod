@@ -7,4 +7,6 @@ require (
 	github.com/mattn/go-sqlite3 v1.14.37
 )
 
+require github.com/teambition/rrule-go v1.8.2 // indirect
+
 replace github.com/kayushkin/llm-bridge => ../llm-bridge
