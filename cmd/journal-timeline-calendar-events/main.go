@@ -5,7 +5,8 @@
 //
 // calendar-store holds the events and who each was with; this command writes
 // timeline items that cite an event by its id (calendar_event_000001). A
-// calendar holds a plan, not proof it happened, and the items say so.
+// calendar entry is a reminder or a plan, not a record that he went, and the
+// items say so.
 //
 // A repeating event becomes one item that spans its dates, from its first to
 // its last when the rule ends, and is written once its first date has passed.
@@ -35,6 +36,10 @@ import (
 )
 
 var client = &http.Client{Timeout: time.Minute}
+
+// ReminderCaveat ends every item: many calendar entries are reminders of
+// things he might go to, so an item says nothing about whether he went.
+const ReminderCaveat = "Calendar entries are reminders and plans; this does not say he went."
 
 // calendarPageSize is the most calendar-store's GET /events answers at once.
 const calendarPageSize = 1000
@@ -309,8 +314,8 @@ func (importer *importer) place(event calendarEvent, calendarTimelineID string, 
 	if len(others) > 0 {
 		withWhom = " With " + strings.Join(others, ", ") + "."
 	}
-	body := fmt.Sprintf("On his calendar: [%s](ref:%s)%s%s.%s A calendar holds a plan, not proof it happened.",
-		markdownText(title), event.ID, where, repeats, withWhom)
+	body := fmt.Sprintf("A reminder on his calendar: [%s](ref:%s)%s%s.%s %s",
+		markdownText(title), event.ID, where, repeats, withWhom, ReminderCaveat)
 	item := journalstore.TimelineItemInput{OccurredAt: when.OccurredAt, EndsAt: when.EndsAt, Precision: when.Precision,
 		Title: title, Body: body, Sources: []string{event.ID}}
 	targets := []string{calendarTimelineID}
