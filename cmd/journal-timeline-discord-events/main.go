@@ -47,7 +47,13 @@ const sameDateWindow = 36 * 3600
 
 // ownedBodyPrefixes start the bodies of items this command writes, now and
 // before it worked from attendance.
-var ownedBodyPrefixes = []string{"Went to [", "Both went to [", "Signed up for [", "Both signed up for ["}
+var ownedBodyPrefixes = []string{"Went to [", "Both went to [", "Signed up for [", "Both signed up for [", withdrawnBodyPrefix}
+
+// withdrawnBodyPrefix starts the body an owned item is given just before this
+// command deletes it. A deleted item with this body was removed by the
+// command, so it is restored if an attendance record comes for its date; a
+// deleted item with any other body was removed by a person and stays removed.
+const withdrawnBodyPrefix = "No attendance record for this date: "
 
 type attendance struct {
 	Ref                string `json:"ref"`
@@ -178,10 +184,10 @@ type importer struct {
 	guildTimelines                   map[string]string
 	dryRun                           bool
 
-	personByDiscord                 map[string]*person
-	personTimelines                 map[string][]string
-	items                           map[string][]timelineItem
-	added, changed, removed, linked int
+	personByDiscord                           map[string]*person
+	personTimelines                           map[string][]string
+	items                                     map[string][]timelineItem
+	added, changed, removed, restored, linked int
 }
 
 func (importer *importer) personOf(discordUserID string) (*person, error) {
@@ -353,6 +359,20 @@ func (importer *importer) apply(plans []wanted) error {
 					return err
 				}
 			}
+		case match.DeletedAt != 0 && strings.HasPrefix(match.Body, withdrawnBodyPrefix):
+			kept[match.ID] = true
+			importer.restored++
+			log.Printf("restore %s on %s: an attendance record came for it", match.ID, plan.TimelineID)
+			if !importer.dryRun {
+				if _, err := request(http.MethodPost, importer.journalURL+"/timeline-items/"+match.ID+"/restore", nil, http.StatusOK, nil); err != nil {
+					return err
+				}
+				if _, err := request(http.MethodPatch, importer.journalURL+"/timeline-items/"+match.ID,
+					map[string]any{"body": plan.Item.Body, "sources": plan.Item.Sources, "occurred_at": plan.Item.OccurredAt,
+						"ends_at": plan.Item.EndsAt, "title": plan.Item.Title}, http.StatusOK, nil); err != nil {
+					return err
+				}
+			}
 		case match.DeletedAt != 0:
 			kept[match.ID] = true
 		case owned(*match):
@@ -414,6 +434,11 @@ func (importer *importer) apply(plans []wanted) error {
 			importer.removed++
 			log.Printf("delete %s on %s: he has no attendance record for it", item.ID, timelineID)
 			if !importer.dryRun {
+				withdrawn := withdrawnBodyPrefix + strings.TrimPrefix(item.Body, withdrawnBodyPrefix)
+				if _, err := request(http.MethodPatch, importer.journalURL+"/timeline-items/"+item.ID,
+					map[string]any{"body": withdrawn}, http.StatusOK, nil); err != nil {
+					return err
+				}
 				if _, err := request(http.MethodDelete, importer.journalURL+"/timeline-items/"+item.ID, nil, http.StatusNoContent, nil); err != nil {
 					return err
 				}
@@ -492,8 +517,8 @@ func (importer *importer) run() error {
 	if importer.dryRun {
 		verb = " (dry run: nothing written)"
 	}
-	log.Printf("%d dates he went to; added %d, rewrote %d, deleted %d, added his record to %d hand-written items%s",
-		len(dates), importer.added, importer.changed, importer.removed, importer.linked, verb)
+	log.Printf("%d dates he went to; added %d, restored %d, rewrote %d, deleted %d, added his record to %d hand-written items%s",
+		len(dates), importer.added, importer.restored, importer.changed, importer.removed, importer.linked, verb)
 	return nil
 }
 
