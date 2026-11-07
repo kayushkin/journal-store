@@ -18,8 +18,8 @@ import (
 	"github.com/kayushkin/llm-bridge/servicesettings"
 )
 
-// The one required setting, so every other test's environment can start.
-var withToken = map[string]string{"KANBAN_STORE_SERVICE_TOKEN": "test-token"}
+// No setting is required; every test's environment starts from nothing.
+var withToken = map[string]string{}
 
 func environment(extra map[string]string) servicesettings.Environment {
 	merged := map[string]string{}
@@ -48,33 +48,21 @@ func TestTheRegistryReadsDefaultsAndTheOperatorsValues(t *testing.T) {
 	}
 
 	set, err := NewSettingsRegistry(environment(map[string]string{
-		"JOURNAL_STORE_ADDR":             "127.0.0.1:9999",
-		"JOURNAL_STORE_DATA_DIR":         "/srv/journal",
-		"JOURNAL_STORE_NOTEBOARD_URL":    "http://noteboard.test",
-		"JOURNAL_STORE_KANBAN_STORE_URL": "http://kanban.test",
+		"JOURNAL_STORE_ADDR":                "127.0.0.1:9999",
+		"JOURNAL_STORE_DATA_DIR":            "/srv/journal",
+		"JOURNAL_STORE_NOTEBOARD_URL":       "http://noteboard.test",
+		"JOURNAL_STORE_REFERENCE_STORE_URL": "http://references.test",
 	}))
 	if err != nil {
 		t.Fatal(err)
 	}
 	for key, want := range map[string]string{
 		SettingListenAddress: "127.0.0.1:9999", SettingDataDirectory: "/srv/journal",
-		SettingNoteboardURL: "http://noteboard.test", SettingKanbanStoreURL: "http://kanban.test",
-		SettingKanbanStoreServiceToken: "test-token",
+		SettingNoteboardURL: "http://noteboard.test", SettingReferenceStoreURL: "http://references.test",
 	} {
 		if got := set.String(key); got != want {
 			t.Errorf("%s = %q, want %q", key, got, want)
 		}
-	}
-}
-
-func TestTheServiceRefusesToStartWithoutKanbanStoresToken(t *testing.T) {
-	registry, err := NewSettingsRegistry(servicesettings.MapEnvironment(map[string]string{}))
-	if err != nil {
-		t.Fatal(err)
-	}
-	err = registry.CheckRequired()
-	if err == nil || !strings.Contains(err.Error(), "KANBAN_STORE_SERVICE_TOKEN") {
-		t.Fatalf("NewSettingsRegistry with no token = %v, want a refusal naming KANBAN_STORE_SERVICE_TOKEN", err)
 	}
 }
 
@@ -102,7 +90,7 @@ func TestGetSettingsDescribesTheServiceHidesTheTokenAndNothingCanBeWritten(t *te
 		t.Fatalf("GET /settings = %d: %s", recorder.Code, recorder.Body)
 	}
 	if strings.Contains(recorder.Body.String(), "test-token") {
-		t.Errorf("GET /settings shows the kanban-store token's value")
+		t.Errorf("GET /settings shows a secret's value")
 	}
 	var described msg.ServiceSettings
 	if err := json.Unmarshal(recorder.Body.Bytes(), &described); err != nil {

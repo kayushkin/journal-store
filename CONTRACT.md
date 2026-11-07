@@ -29,8 +29,7 @@ Declared once in `settings.go`, served read-only at `GET /settings`.
 | `JOURNAL_STORE_ADDR` | `127.0.0.1:8322` | listen address |
 | `JOURNAL_STORE_DATA_DIR` | `~/.config/journal-store` | holds `journal-store.db` |
 | `JOURNAL_STORE_NOTEBOARD_URL` | `http://localhost:8191` | where promote-todo creates todos |
-| `JOURNAL_STORE_KANBAN_STORE_URL` | `http://localhost:8305` | where the entity-type registry is read |
-| `KANBAN_STORE_SERVICE_TOKEN` | — (required, secret) | kanban-store's internal token; unset stops the start |
+| `JOURNAL_STORE_REFERENCE_STORE_URL` | `http://127.0.0.1:8343` | where the list of reference types is read (`GET /types`, open) |
 
 ---
 
@@ -64,11 +63,11 @@ rewritten: `entry_id`, `position` (0-based order), `line` (1-based),
 `entity_ref`, `entity_type`, `label`. Links with any other target, and links
 inside code spans or fenced code blocks, are not mentions.
 
-`entity_type` comes from kanban-store's entity-type registry
+`entity_type` comes from reference-store's list of reference types
 (`GET /api/entity-types`, read with the service token at start and every five
 minutes). It is the registry type whose `id_patterns` (anchored,
 case-insensitive, as dash reads them) **alone** match the ref; when none or
-several match it is `''`. A write never waits on kanban-store: if the registry
+several match it is `''`. A write never waits on reference-store: if the registry
 cannot be read, the mention is stored with an empty type, `GET /health` says
 `degraded` with the error, and the next good read backfills every empty type it
 can classify.
@@ -169,7 +168,7 @@ noteboard call, so the line cannot change in between.
 
 dash's `POST /api/resolve` probes a registry type's `get` route for an id that
 matches its `id_patterns`, and treats 200 as a hit and 404 as an honest miss.
-kanban-store's registry row for this store is
+reference-store's list of types row for this store is
 `{"type":"entry","service":"journal-store","get":"/entries/{id}","id_patterns":["entry_\\d{6,}"]}`.
 `GET /entries/{id}` answers 200 with the entry, or 404 for an unknown or
 deleted one. dash also needs `journal-store` in its `resolveServiceURLSetting`

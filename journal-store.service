@@ -17,8 +17,6 @@ Environment=JOURNAL_STORE_ADDR=127.0.0.1:8322
 WorkingDirectory=%h
 Restart=on-failure
 RestartSec=5
-# KANBAN_STORE_SERVICE_TOKEN comes from a host-local drop-in,
-# ~/.config/systemd/user/journal-store.service.d/, never from this file.
 
 [Install]
 WantedBy=default.target

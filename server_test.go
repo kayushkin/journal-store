@@ -14,7 +14,7 @@ import (
 	"time"
 )
 
-// testRegistryRows is a cut of kanban-store's registry: enough to show a
+// testRegistryRows is a cut of reference-store's list of types: enough to show a
 // prefixed id typed, a uuid typed, and two patterns that both claim an id.
 var testRegistryRows = []EntityTypeRow{
 	{Type: "person", Service: "people-store", Get: "/people/{id}", IDPatterns: []string{`person_\d{6,}`}},
@@ -288,7 +288,7 @@ func TestMentionsStoredBeforeTheRegistryCouldBeReadAreTypedAfterward(t *testing.
 	failing := true
 	registry := &EntityTypeRegistry{fetch: func() ([]EntityTypeRow, error) {
 		if failing {
-			return nil, errors.New("kanban-store unreachable")
+			return nil, errors.New("reference-store unreachable")
 		}
 		return testRegistryRows, nil
 	}}

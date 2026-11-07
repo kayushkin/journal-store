@@ -14,7 +14,7 @@ import (
 	"github.com/kayushkin/llm-bridge/servicesettings"
 )
 
-// registryRefreshInterval is how often kanban-store's entity-type registry is
+// registryRefreshInterval is how often reference-store's list of reference types is
 // read again. A type added there reaches new mentions within this long, and
 // old mentions are backfilled on the same tick.
 const registryRefreshInterval = 5 * time.Minute
@@ -29,8 +29,7 @@ func main() {
 	}
 	addr := settings.String(journalstore.SettingListenAddress)
 
-	registry := journalstore.NewKanbanEntityTypeRegistry(
-		settings.String(journalstore.SettingKanbanStoreURL), settings.String(journalstore.SettingKanbanStoreServiceToken))
+	registry := journalstore.NewReferenceStoreEntityTypeRegistry(settings.String(journalstore.SettingReferenceStoreURL))
 	noteboard := journalstore.NewNoteboardClient(settings.String(journalstore.SettingNoteboardURL))
 
 	store, err := journalstore.Open(settings.String(journalstore.SettingDataDirectory), registry, noteboard)

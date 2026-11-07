@@ -2,7 +2,7 @@
 
 ## What it owns
 
-`:8322`, loopback only. The user's own writing: journal entries, blog posts, notes, notes about one person or thing, timelines, and transcripts of conversations the user took part in (`kind`: `journal`, `post`, `note`, `about`, `timeline`, `transcript`, served by `GET /entry-kinds`). Ids are `entry_000001`, registered in kanban-store's entity-type registry as type `entry`, so dash can turn one into a chip. **This is private writing, kept apart from noteboard on purpose**: noteboard is mostly agent output and every agent reads it. Do not copy entries into noteboard, and do not read them into an agent's output unless the user asked. `CONTRACT.md` is the route table.
+`:8322`, loopback only. The user's own writing: journal entries, blog posts, notes, notes about one person or thing, timelines, and transcripts of conversations the user took part in (`kind`: `journal`, `post`, `note`, `about`, `timeline`, `transcript`, served by `GET /entry-kinds`). Ids are `entry_000001`, registered in reference-store's list of reference types as type `entry`, so dash can turn one into a chip. **This is private writing, kept apart from noteboard on purpose**: noteboard is mostly agent output and every agent reads it. Do not copy entries into noteboard, and do not read them into an agent's output unless the user asked. `CONTRACT.md` is the route table.
 
 ## Where this prompt lives
 
@@ -12,7 +12,7 @@ These sections are stored in agent-store as a project prompt collection and rend
 
 ## Mentions are ref: links
 
-`[Carol](ref:person_000012)` in a body is a mention of `person_000012`. **The id is the truth; the link text is only what was shown when it was written.** Every write reparses the body and rewrites the entry's rows in `mentions`; `GET /mentions?ref=<id>` lists the live entries that mention an id. `entity_type` is the one kanban-store registry type whose `id_patterns` match the ref, or `''` when none or several do. The registry is read at start and every five minutes with `KANBAN_STORE_SERVICE_TOKEN`; a failed read never blocks a write — the mention is stored untyped, `GET /health` says `degraded`, and the next good read backfills. Do not add a list of id prefixes here: the registry is the only list.
+`[Carol](ref:person_000012)` in a body is a mention of `person_000012`. **The id is the truth; the link text is only what was shown when it was written.** Every write reparses the body and rewrites the entry's rows in `mentions`; `GET /mentions?ref=<id>` lists the live entries that mention an id. `entity_type` is the one reference-store type whose `id_patterns` match the ref, or `''` when none or several do. The registry is read at start and every five minutes with `KANBAN_STORE_SERVICE_TOKEN`; a failed read never blocks a write — the mention is stored untyped, `GET /health` says `degraded`, and the next good read backfills. Do not add a list of id prefixes here: the registry is the only list.
 
 ## Timelines
 

@@ -51,7 +51,7 @@ type Mention struct {
 	Line int `json:"line"`
 	// EntityRef is the id the link points at, and the only thing to join on.
 	EntityRef string `json:"entity_ref"`
-	// EntityType is the kanban-store registry type whose id pattern alone
+	// EntityType is the reference-store type whose id pattern alone
 	// matches EntityRef. Empty when none or several match, or when the
 	// registry has not been read yet.
 	EntityType string `json:"entity_type"`
@@ -233,8 +233,8 @@ type Counts struct {
 	TimelineItems int `json:"timeline_items"`
 }
 
-// EntityRegistryStatus says how fresh this process's copy of kanban-store's
-// entity-type registry is.
+// EntityRegistryStatus says how fresh this process's copy of reference-store's
+// list of reference types is.
 type EntityRegistryStatus struct {
 	Types     int    `json:"types"`
 	FetchedAt int64  `json:"fetched_at"`

@@ -127,7 +127,7 @@ func (s *Store) Registry() *EntityTypeRegistry { return s.registry }
 func now() int64 { return time.Now().Unix() }
 
 // formatID renders a sequence number as the public id. The prefix lets
-// kanban-store's registry claim entry ids with a pattern of their own
+// reference-store's list of types claim entry ids with a pattern of their own
 // (entry_\d{6,}) without touching noteboard's uuids, so dash's resolver
 // probes this store only for ids that can be entries.
 func formatID(seq int64) string { return fmt.Sprintf("entry_%06d", seq) }

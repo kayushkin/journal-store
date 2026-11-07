@@ -19,11 +19,10 @@ const OwnedEnvironmentVariablePrefix = "JOURNAL_STORE_"
 
 // Keys of the settings, as GET /settings names them.
 const (
-	SettingListenAddress           = "listen_address"
-	SettingDataDirectory           = "data_directory"
-	SettingNoteboardURL            = "noteboard_url"
-	SettingKanbanStoreURL          = "kanban_store_url"
-	SettingKanbanStoreServiceToken = "kanban_store_service_token"
+	SettingListenAddress     = "listen_address"
+	SettingDataDirectory     = "data_directory"
+	SettingNoteboardURL      = "noteboard_url"
+	SettingReferenceStoreURL = "reference_store_url"
 )
 
 // DefaultListenAddress is where the service listens with nothing set. Loopback,
@@ -49,10 +48,8 @@ func SettingDefinitions() []servicesettings.Definition {
 			Description: "The directory that holds journal-store.db. Changing it starts the service on whatever database is there, or an empty one; the old entries stay where they were."},
 		wiring(SettingNoteboardURL, "JOURNAL_STORE_NOTEBOARD_URL", "http://localhost:8191",
 			"noteboard. POST /entries/{id}/promote-todo creates the todo there."),
-		wiring(SettingKanbanStoreURL, "JOURNAL_STORE_KANBAN_STORE_URL", "http://localhost:8305",
-			"kanban-store. Its entity-type registry (GET /api/entity-types) says which type a ref: link's id is."),
-		{Key: SettingKanbanStoreServiceToken, EnvironmentVariable: "KANBAN_STORE_SERVICE_TOKEN", Kind: msg.ServiceSettingKindSecret, ValueType: msg.ServiceSettingValueTypeString, Required: true,
-			Description: "The token kanban-store takes from an internal service. Without it kanban-store answers every call 401 and no mention could ever be typed, so the service refuses to start."},
+		wiring(SettingReferenceStoreURL, "JOURNAL_STORE_REFERENCE_STORE_URL", "http://127.0.0.1:8343",
+			"reference-store. Its list of reference types (GET /types) says which type a ref: link's id is."),
 	}
 }
 

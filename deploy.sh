@@ -46,14 +46,6 @@ if [ -z "$vcs_revision" ]; then
 fi
 echo "    vcs.revision=$vcs_revision"
 
-# The service refuses to start without kanban-store's service token, which only
-# a host-local drop-in may hold.
-if ! grep -qs 'KANBAN_STORE_SERVICE_TOKEN\|EnvironmentFile' "$DROP_IN"/*.conf; then
-  echo "ERROR: no drop-in in $DROP_IN gives the service KANBAN_STORE_SERVICE_TOKEN" >&2
-  echo "       (for example $DROP_IN/token.conf with [Service] and Environment=KANBAN_STORE_SERVICE_TOKEN=…, or EnvironmentFile= naming a mode-600 file)" >&2
-  exit 1
-fi
-
 # A set JOURNAL_STORE_ variable that settings.go does not declare, or a missing
 # required one, stops the new binary at boot. Ask before the old one is stopped:
 # build the registry from the running service's own environment. The test prints
@@ -111,7 +103,7 @@ curl -sfS "$BASE/entries?q=test" >/dev/null || {
   exit 1
 }
 if ! printf '%s' "$health" | python3 -c 'import json,sys; sys.exit(0 if json.load(sys.stdin)["status"]=="ok" else 1)'; then
-  echo "ERROR: /health is not ok — mentions cannot be typed until kanban-store's registry reads:"
+  echo "ERROR: /health is not ok — mentions cannot be typed until reference-store's list of types reads:"
   printf '%s\n' "$health"
   exit 1
 fi

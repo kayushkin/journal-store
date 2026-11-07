@@ -19,8 +19,8 @@ HTTP API.
   records it, and `GET /mentions?ref=person_000012` lists the entries that
   mention Carol. The link text is only what was shown when it was written.
   Which kind of record an id is comes from
-  [kanban-store](https://github.com/kayushkin/kanban-store)'s entity-type
-  registry.
+  [reference-store](https://github.com/kayushkin/reference-store)'s list of
+  reference types.
 - **Keep history.** `DELETE` is soft, and every update, delete, restore and
   import update first copies the whole row to a revision.
 - **Publish.** An entry is `private`, `draft` or `published`; published ones
@@ -60,7 +60,7 @@ go build -tags sqlite_fts5 ./cmd/...
 ## Run
 
 ```sh
-KANBAN_STORE_SERVICE_TOKEN=… ./journal-store   # listens on 127.0.0.1:8322
+./journal-store   # listens on 127.0.0.1:8322
 curl -s localhost:8322/health
 ```
 
@@ -69,8 +69,7 @@ curl -s localhost:8322/health
 | `JOURNAL_STORE_ADDR` | `127.0.0.1:8322` | listen address |
 | `JOURNAL_STORE_DATA_DIR` | `~/.config/journal-store` | holds `journal-store.db` (directory 0700, file 0600) |
 | `JOURNAL_STORE_NOTEBOARD_URL` | `http://localhost:8191` | where promote-todo creates todos |
-| `JOURNAL_STORE_KANBAN_STORE_URL` | `http://localhost:8305` | where the entity-type registry is read |
-| `KANBAN_STORE_SERVICE_TOKEN` | required | kanban-store's internal service token |
+| `JOURNAL_STORE_REFERENCE_STORE_URL` | `http://127.0.0.1:8343` | where the list of reference types is read (`GET /types`, open) |
 
 `GET /settings` describes every setting and the value in force, never a
 secret's value. A set `JOURNAL_STORE_` variable that is not in this table
@@ -81,9 +80,7 @@ put a front door that checks who is asking in front of it if anyone else
 should reach it.
 
 To run it as a systemd user service, copy the binary to `~/bin` and
-`journal-store.service` to `~/.config/systemd/user/`, put
-`KANBAN_STORE_SERVICE_TOKEN` in a drop-in such as
-`~/.config/systemd/user/journal-store.service.d/token.conf` (mode 600), then
+`journal-store.service` to `~/.config/systemd/user/`, then
 `systemctl --user enable --now journal-store`.
 
 ## Use it

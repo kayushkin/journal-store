@@ -9,9 +9,9 @@ import (
 	"time"
 )
 
-// EntityTypeRow is one row of kanban-store's GET /api/entity-types, the
-// fields this service reads. kanban-store owns the registry; this is a copy
-// for classifying ids, never a second list.
+// EntityTypeRow is one row of reference-store's GET /types, the fields this
+// service reads. reference-store owns the list; this is a copy for
+// classifying ids, never a second list.
 type EntityTypeRow struct {
 	Type       string   `json:"type"`
 	Service    string   `json:"service"`
@@ -24,8 +24,8 @@ type compiledEntityType struct {
 	patterns   []*regexp.Regexp
 }
 
-// EntityTypeRegistry classifies a ref by the id patterns in kanban-store's
-// registry, anchored and case-insensitive, the way dash's resolver reads them.
+// EntityTypeRegistry classifies a ref by the id patterns in reference-store's
+// list, anchored and case-insensitive, the way dash's resolver reads them.
 //
 // It never blocks a write. Until the first read succeeds it classifies
 // nothing, and a mention is stored with an empty type; Store.BackfillMention
@@ -40,29 +40,26 @@ type EntityTypeRegistry struct {
 	lastError error
 }
 
-// NewKanbanEntityTypeRegistry reads the registry from kanban-store with the
-// internal service token. Nothing is read until Refresh.
-func NewKanbanEntityTypeRegistry(kanbanStoreURL, serviceToken string) *EntityTypeRegistry {
+// NewReferenceStoreEntityTypeRegistry reads the list from reference-store,
+// whose GET /types is open to any caller. Nothing is read until Refresh.
+func NewReferenceStoreEntityTypeRegistry(referenceStoreURL string) *EntityTypeRegistry {
 	client := &http.Client{Timeout: 10 * time.Second}
 	return &EntityTypeRegistry{fetch: func() ([]EntityTypeRow, error) {
-		request, err := http.NewRequest(http.MethodGet, kanbanStoreURL+"/api/entity-types", nil)
+		response, err := client.Get(referenceStoreURL + "/types")
 		if err != nil {
-			return nil, err
-		}
-		request.Header.Set("X-Kanban-Store-Service-Token", serviceToken)
-		response, err := client.Do(request)
-		if err != nil {
-			return nil, fmt.Errorf("kanban-store entity-type registry unreachable: %w", err)
+			return nil, fmt.Errorf("reference-store's list of types unreachable: %w", err)
 		}
 		defer response.Body.Close()
 		if response.StatusCode != http.StatusOK {
-			return nil, fmt.Errorf("kanban-store entity-type registry answered %d", response.StatusCode)
+			return nil, fmt.Errorf("reference-store's list of types answered %d", response.StatusCode)
 		}
-		var rows []EntityTypeRow
-		if err := json.NewDecoder(response.Body).Decode(&rows); err != nil {
-			return nil, fmt.Errorf("kanban-store entity-type registry unparseable: %w", err)
+		var answer struct {
+			Types []EntityTypeRow `json:"types"`
 		}
-		return rows, nil
+		if err := json.NewDecoder(response.Body).Decode(&answer); err != nil {
+			return nil, fmt.Errorf("reference-store's list of types unparseable: %w", err)
+		}
+		return answer.Types, nil
 	}}
 }
 
